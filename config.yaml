@@ -1,0 +1,9 @@
+symbol: ARUSDT
+exchange: binance
+intervals: ["1d", "1w"]
+data_limit: 500
+
+notify:
+  method: serverchan
+  key: your_serverchan_key_here
+
