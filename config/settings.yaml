@@ -1,0 +1,69 @@
+# 量化信号监控系统配置文件
+
+# 监控币种列表（可扩展）
+symbols:
+  - "AR/USDT"    # 主跟踪币
+  # - "BTC/USDT" # 可选备用币
+  # - "ETH/USDT" # 可选备用币
+
+# 交易所配置
+exchange:
+  name: "okx"    # 交易所名称
+  api_base: "https://www.okx.com/api/v5"
+
+# 数据获取配置
+data:
+  intervals: ["1d", "4h"]  # 分析周期：日线用于趋势，4小时用于信号
+  limit: 100               # K线数量（OKX限制最多100）
+
+# 信号检测配置
+signals:
+  # 信号强度阈值
+  strong_threshold: 0.8    # 强烈信号阈值（0-1）
+  medium_threshold: 0.6    # 中等信号阈值
+  
+  # 持仓管理
+  max_holding_days: 7      # 最大持仓天数（超过则强制平仓）
+  
+  # 技术指标参数
+  indicators:
+    ema:
+      fast: 12
+      slow: 26
+    macd:
+      fast: 12
+      slow: 26
+      signal: 9
+    rsi:
+      period: 14
+    kdj:
+      period: 9
+      k_period: 3
+      d_period: 3
+    bollinger:
+      period: 20
+      std_dev: 2.0
+
+# 通知配置
+notify:
+  method: "serverchan"
+  serverchan:
+    key: "SCT301986TWvJKtkBJjIQAwWm7ayQkhs79"
+    enable: true
+  
+  # 通知级别（只推送指定级别以上的信号）
+  min_level: "medium"  # strong, medium, weak
+
+# 定时任务配置
+scheduler:
+  signal_check_interval: 4    # 信号检测间隔（小时）
+  daily_report_time: "09:00"   # 每日报告时间（北京时间）
+  timezone: "Asia/Shanghai"
+
+# 日志配置
+logging:
+  level: "INFO"           # DEBUG, INFO, WARNING, ERROR
+  file: "logs/signal_log.txt"
+  max_size_mb: 10         # 日志文件最大大小（MB）
+  backup_count: 5         # 保留的日志文件数量
+

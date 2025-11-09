@@ -12,17 +12,29 @@ class OKXDataFetcher:
     
     BASE_URL = "https://www.okx.com/api/v5/market/candles"
     
-    def __init__(self, symbol: str = "ARUSDT"):
+    def __init__(self, symbol: str = None):
         # OKX 使用 AR-USDT 格式
-        if "-" not in symbol:
-            # 将 ARUSDT 转换为 AR-USDT
-            if symbol.endswith("USDT"):
-                base = symbol[:-4]
-                self.symbol = f"{base}-USDT"
-            else:
-                self.symbol = symbol
-        else:
-            self.symbol = symbol
+        self.default_symbol = symbol or "AR/USDT"
+    
+    def _normalize_symbol(self, symbol: str) -> str:
+        """标准化交易对格式（AR/USDT -> AR-USDT）"""
+        if not symbol:
+            symbol = self.default_symbol
+        
+        # 如果已经是 OKX 格式（包含-），直接返回
+        if "-" in symbol:
+            return symbol
+        
+        # 转换格式：AR/USDT -> AR-USDT
+        if "/" in symbol:
+            return symbol.replace("/", "-")
+        
+        # ARUSDT -> AR-USDT
+        if symbol.endswith("USDT"):
+            base = symbol[:-4]
+            return f"{base}-USDT"
+        
+        return symbol
     
     def _convert_interval(self, interval: str) -> str:
         """
@@ -46,7 +58,7 @@ class OKXDataFetcher:
         }
         return interval_map.get(interval.lower(), "1D")
     
-    def fetch_klines(self, interval: str, limit: int = 500) -> pd.DataFrame:
+    def fetch_klines(self, symbol: str, interval: str, limit: int = 500) -> pd.DataFrame:
         """
         获取K线数据
         
@@ -61,17 +73,20 @@ class OKXDataFetcher:
         if limit > 100:
             limit = 100
         
+        # 标准化交易对
+        normalized_symbol = self._normalize_symbol(symbol)
+        
         # 转换时间周期格式
         okx_interval = self._convert_interval(interval)
         
         params = {
-            "instId": self.symbol,
+            "instId": normalized_symbol,
             "bar": okx_interval,
             "limit": str(limit)
         }
         
         try:
-            print(f"📡 正在从 OKX 获取 {self.symbol} {interval} 数据...")
+            print(f"📡 正在从 OKX 获取 {normalized_symbol} {interval} 数据...")
             response = requests.get(self.BASE_URL, params=params, timeout=15)
             response.raise_for_status()
             result = response.json()
@@ -82,7 +97,7 @@ class OKXDataFetcher:
             
             data = result.get("data", [])
             if not data:
-                raise ValueError(f"No data returned for {self.symbol} {interval}")
+                raise ValueError(f"No data returned for {normalized_symbol} {interval}")
             
             # OKX 返回格式: [ts, o, h, l, c, vol, volCcy, volCcyQuote, confirm]
             # 数据是倒序的（最新的在前），需要反转
@@ -111,14 +126,15 @@ class OKXDataFetcher:
             # 如果 OKX API 失败，尝试使用备用方法
             print(f"⚠️  OKX API 访问失败: {e}")
             print(f"📡 尝试使用备用数据源...")
-            return self._fetch_fallback_data(interval, limit)
+            return self._fetch_fallback_data(symbol, interval, limit)
     
-    def _fetch_fallback_data(self, interval: str, limit: int = 500) -> pd.DataFrame:
+    def _fetch_fallback_data(self, symbol: str, interval: str, limit: int = 500) -> pd.DataFrame:
         """
         备用数据获取方法 - 使用 CoinGecko API 获取当前价格，生成模拟历史数据
         """
         try:
-            print(f"📡 使用备用数据源获取 {self.symbol} 数据...")
+            normalized_symbol = self._normalize_symbol(symbol)
+            print(f"📡 使用备用数据源获取 {normalized_symbol} 数据...")
             
             from datetime import datetime, timedelta
             import numpy as np

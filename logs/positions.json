@@ -1,0 +1,19 @@
+{
+  "AR/USDT": [
+    {
+      "id": "AR/USDT_20251109_113215",
+      "symbol": "AR/USDT",
+      "signal_type": "买入",
+      "entry_price": 5.5,
+      "entry_time": "2025-11-09T11:32:15.856851",
+      "exit_price": 5.6,
+      "exit_time": "2025-11-09T11:32:15.857028",
+      "signal_strength": 0.8,
+      "signal_level": "strong",
+      "status": "closed",
+      "profit_loss": 0.09999999999999964,
+      "profit_loss_pct": 1.818181818181812,
+      "holding_days": 0
+    }
+  ]
+}
