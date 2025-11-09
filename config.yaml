@@ -1,5 +1,5 @@
 symbol: ARUSDT
-exchange: binance
+exchange: okx
 intervals: ["1d", "1w"]
 data_limit: 500
 

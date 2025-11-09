@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from app.fetch_data import BinanceDataFetcher
+from app.fetch_data import OKXDataFetcher
 from app.indicators import IndicatorCalculator
 from app.notifier import Notifier
 from backtest import Backtester
@@ -21,7 +21,7 @@ class CryptoSignalLite:
     def __init__(self, config_path: str = "config.yaml"):
         self.config_path = config_path
         self.config = self.load_config()
-        self.fetcher = BinanceDataFetcher(symbol=self.config["symbol"])
+        self.fetcher = OKXDataFetcher(symbol=self.config["symbol"])
         self.calculator = IndicatorCalculator()
         self.notifier = Notifier(
             method=self.config.get("notify", {}).get("method", "serverchan"),
